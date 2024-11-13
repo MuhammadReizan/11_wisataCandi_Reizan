@@ -96,13 +96,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 RichText(
                   text: TextSpan(
                     text: 'Sudah punya akun?',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16, color: Colors.deepPurple,
                     ),
                     children: <TextSpan>[
                       TextSpan(
                         text: 'Masuk disini.',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                           fontSize: 16,
