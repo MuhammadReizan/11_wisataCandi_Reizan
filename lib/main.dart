@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wisatacandi/screens/Sign_up_screen.dart';
 import 'package:wisatacandi/screens/home_screen.dart';
 import 'package:wisatacandi/screens/profile_screen.dart';
-import 'package:wisatacandi/screens/sign_in_screen.dart';
-import 'data/candi_data.dart';
-import 'screens/detail_screen.dart';
 import 'screens/search_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/favorite_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -21,24 +17,76 @@ class MainApp extends StatelessWidget {
       title: 'Wisata Candi',
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
-            iconTheme: IconThemeData(color: Colors.deepPurple),
-            titleTextStyle: TextStyle(
-              color: Colors.deepPurple,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            )),
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(
+          iconTheme: IconThemeData(color: Colors.deepPurple),
+          titleTextStyle: TextStyle(
+            color: Colors.deepPurple,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(
           primary: Colors.deepPurple,
           surface: Colors.deepPurple[50],
         ),
         useMaterial3: true,
       ),
-      //home : DetailScreen(candi:candilist)
-      //home : DetailScreen(candi:candilist)
-      // home: SignInScreen(),
-      home: HomeScreen(),
+      home: const MainScreen(),
     );
   }
 }
 
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+  final List<Widget> _children = [
+    const HomeScreen(),
+    const SearchScreen(),
+    const FavoriteScreen(),
+    const ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _children[_currentIndex],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.deepPurple[50],
+        ),
+        child: BottomNavigationBar(
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home, color: Colors.deepPurple),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search, color: Colors.deepPurple),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite, color: Colors.deepPurple),
+              label: 'Favorite',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person, color: Colors.deepPurple),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex: _currentIndex,
+          selectedItemColor: Colors.deepPurple,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        ),
+      ),
+    );
+  }
+}
