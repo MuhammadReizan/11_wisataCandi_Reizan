@@ -1,10 +1,63 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatacandi/models/candi.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   final Candi candi;
   const DetailScreen({super.key, required this.candi});
+
+  @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  bool isFavorite = false;
+  bool isSignedIn = false; 
+
+  @override
+  void initState(){
+    super.initState();
+    _loadFavoriteStatus();  
+  }
+
+// memeriksa status sign in
+  void _checkSignInStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool signedIn = prefs.getBool('isSignedIn') ?? false;
+    setState(() {
+      isSignedIn = signedIn;
+    });
+  }
+
+// memeriksa status favorit
+  void _loadFavoriteStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool favorite = prefs.getBool('favorite_${widget.candi.name}') ?? false;
+    setState(() {
+      isFavorite = favorite;
+    });
+  }
+
+  Future<void> _toggleFavorite() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    //Memeriksa apakah pengguna sudah sign in
+    if(!isSignedIn){
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        Navigator.pushReplacementNamed(context, '/signin');
+      });
+      return;
+    }
+    bool favoriteStatus = isFavorite;
+    prefs.setBool('favorite_${widget.candi.name}', favoriteStatus);
+
+    setState(() {
+      isFavorite = favoriteStatus;
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -14,20 +67,25 @@ class DetailScreen extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      candi.imageAsset,
-                      width: double.infinity,
-                      height: 300,
-                      fit: BoxFit.cover,
+                Hero(
+                  tag: widget.candi.imageAsset,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        widget.candi.imageAsset,
+                        width: double.infinity,
+                        height: 300,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
+                // tombol back kustom
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.deepPurple[100]?.withOpacity(0.8),
@@ -35,7 +93,7 @@ class DetailScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context); // Aksi kembali ke layar sebelumnya
+                        Navigator.pop(context);
                       },
                       icon: const Icon(Icons.arrow_back),
                     ),
@@ -48,26 +106,39 @@ class DetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // info atas
-                  const SizedBox(height: 16),
+                  //info atas
+                  const SizedBox(
+                    height: 16,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        candi.name,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        widget.candi.name,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.favorite_border),
+                        onPressed: () {
+                          _toggleFavorite();
+                        },
+                        icon: Icon(isSignedIn && isFavorite
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                        color: isSignedIn && isFavorite? Colors.red : null,),
                       )
                     ],
                   ),
-                  // info tengah
+                  //info tengah
                   Row(
                     children: [
-                      const Icon(Icons.place, color: Colors.red),
-                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.place,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
                       const SizedBox(
                         width: 70,
                         child: Text(
@@ -75,13 +146,18 @@ class DetailScreen extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(': ${candi.location}')
+                      Text(': ${widget.candi.location}')
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_month, color: Colors.green),
-                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.calendar_month,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
                       const SizedBox(
                         width: 70,
                         child: Text(
@@ -89,13 +165,18 @@ class DetailScreen extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(': ${candi.built}')
+                      Text(': ${widget.candi.built}')
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.house, color: Colors.amber),
-                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.house,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
                       const SizedBox(
                         width: 70,
                         child: Text(
@@ -103,13 +184,19 @@ class DetailScreen extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(': ${candi.type}')
+                      Text(': ${widget.candi.type}')
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Divider(color: Colors.deepPurple.shade100),
-                  const SizedBox(height: 16),
-                  // info bawah
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Divider(
+                    color: Colors.deepPurple.shade100,
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  //info bawah
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -120,17 +207,23 @@ class DetailScreen extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(candi.description),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      SizedBox(
+                        child: Text(widget.candi.description),
+                      ),
                     ],
                   ),
-                  // info galeri
+                  //info galery
                   Padding(
                     padding: const EdgeInsets.all(15),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Divider(color: Colors.deepPurple.shade100),
+                        Divider(
+                          color: Colors.deepPurple.shade100,
+                        ),
                         const Text(
                           'Galeri',
                           style: TextStyle(
@@ -138,15 +231,17 @@ class DetailScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         SizedBox(
                           height: 100,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: candi.imageUrls.length,
+                            itemCount: widget.candi.imageUrls.length,
                             itemBuilder: (context, index) {
                               return Padding(
-                                padding: const EdgeInsets.only(right: 8),
+                                padding: EdgeInsets.only(right: 8),
                                 child: GestureDetector(
                                   onTap: () {},
                                   child: Container(
@@ -160,16 +255,18 @@ class DetailScreen extends StatelessWidget {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
                                       child: CachedNetworkImage(
-                                        imageUrl: candi.imageUrls[index],
+                                        imageUrl: widget.candi.imageUrls[index],
                                         width: 120,
                                         height: 120,
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => Container(
+                                        placeholder: (context, url) =>
+                                            Container(
                                           width: 120,
                                           height: 120,
                                           color: Colors.deepPurple[50],
                                         ),
-                                        errorWidget: (context, url, error) => const Icon(
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(
                                           Icons.error,
                                         ),
                                       ),
@@ -180,10 +277,15 @@ class DetailScreen extends StatelessWidget {
                             },
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(
+                          height: 4,
+                        ),
                         const Text(
                           'Tap untuk memperbesar',
-                          style: TextStyle(fontSize: 12, color: Colors.black54),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
                         ),
                       ],
                     ),

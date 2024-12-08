@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wisatacandi/screens/Sign_up_screen.dart';
 import 'package:wisatacandi/screens/home_screen.dart';
 import 'package:wisatacandi/screens/profile_screen.dart';
 import 'screens/search_screen.dart';
@@ -30,7 +31,7 @@ class MainApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+      home: MainScreen(),
     );
   }
 }
